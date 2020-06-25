@@ -1,0 +1,49 @@
+<html>
+<head>
+<title>{Aplicacion}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link href="cc/css/adm_est.css" rel="stylesheet" type="text/css">
+<link href="cc/css/prism.css" rel="stylesheet" />
+<script src="cc/js/prism.js"></script>
+</head>
+<body leftmargin="0" topmargin="0" onLoad="this.document.form1.dbname.focus()">
+    <table width="900" border="1" bordercolor="#{ColorCorp}" cellspacing="0" cellpadding="5" align="center" class="normal">
+        <tr> 
+            <td colspan="2" bgcolor="#{ColorCorp}" class="titulo_mn">Tablas base de datos: <b>{BaseDatos}</b></td>
+        </tr>
+        <tr>
+            <td width="80">
+                <b>Clase:</b> 
+            </td>
+            <td>
+                {ClassName}
+            </td>
+        </tr>
+        <tr>
+            <td>
+               
+                <b>Archivo:</b> 
+            </td>
+            <td>
+               
+                <i>{FileClass}</i>
+            </td>
+        </tr>
+    </table>
+
+    <table width="900" border="1" bordercolor="#{ColorCorp2}" cellspacing="0" cellpadding="5" align="center" class="normal">
+        <tr>
+            <td>
+                <pre class="language-php">
+                    <code>{Code}</code>
+                </pre>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" bgcolor="#{ColorCorp2}">
+                {ButtonBack}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,376 @@
+/* -------------------------------------------
+Descripcion:    estilos zona administracion
+Version:        2.0
+Autor:          Darío Soto
+Fecha Mod.:     2018-07-23
+---------------------------------------------*/
+
+/* ---------------- Generales -------------*/
+input[type=color] {
+    transform: scale(0.7);
+}
+body{
+    margin-left: 0px;
+    margin-top: 0px;
+}
+a {
+    color: white;
+    background-color: transparent;
+    text-decoration: none;
+}
+a:hover {
+    color: white;
+    background-color: transparent;
+    text-decoration: underline
+}
+a.Link {
+    font: normal 12px Verdana, Arial;
+    color: black;
+    text-decoration: none
+}
+a.Link:hover {
+    font: normal 12px Verdana, Arial;
+    color: #ff0000;
+    text-decoration: none
+}
+a.Linkp {
+    font-weight: normal;
+    font-size: 7pt;
+    color: black;
+    font-style: normal;
+    font-family: Verdana, Arial;
+    font-variant: normal;
+    text-decoration: none;
+}
+a.Linkp:hover {
+    font-weight: normal;
+    font-size: 7pt;
+    color: #ff0000;
+    font-style: normal;
+    font-family: Verdana, Arial;
+    font-variant: normal;
+    text-decoration: none;
+}
+.titulo_mn {
+    font-size: 12pt;
+    color: white;
+    font-family: Verdana, Arial;
+}
+.normal {
+    font-size: 9pt;
+    color: black;
+    font-family: Verdana, Arial;
+}
+.normal_b {
+    font-size: 9pt;
+    color: white;
+    font-family: Verdana, Arial;
+}
+.normal_r {
+    font-size: 9pt;
+    color: #ff0000;
+    font-family: Verdana, Arial;
+}
+.normal_p {
+    font-size: 7pt;
+    color: black;
+    font-family: Verdana, Arial
+}
+.normal_pr {
+    font-size: 7pt;
+    color: red;
+    font-family: Verdana, Arial
+}
+.titulo {
+    font-size: 20pt;
+    color: #000000;
+    font-family: Verdana, Arial;
+    font-style: bold
+}
+.texto {
+    font-size: 12pt;
+    color: black;
+    font-family: Verdana, Arial
+}
+.pie {
+    font-size: 16pt;
+    color: black;
+    font-family: Verdana, Arial
+}
+.firma
+{
+    font-size: 12pt;
+    color: black;
+    font-family: Verdana, Arial
+}
+.cierra_cont a, .abre_cont a {
+    display: block;
+    font-size: 11px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #000000;
+    height: auto;
+    padding-top: 2px;
+    padding-right: 0px;
+    padding-bottom: 2px;
+    padding-left: 16px;
+    background: no-repeat 3px 5px;
+}
+.cierra_cont a:hover, .abre_cont a:hover {
+    background-color: #E0E0E0;
+}
+.cierra_cont a {
+    background-image: url(../i/mas.gif);
+}
+.abre_cont a {
+    background-image: url(../i/menos.gif);
+}
+/* ---------------- Tablas -------------*/
+/* Uso:
+
+<div class="datagrid">
+        <table>
+            <thead>
+                <tr><th>header</th><th>header</th><th>header</th><th>header</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>data</td><td>data</td><td>data</td><td>data</td></tr>
+                <tr class="alt"><td>data</td><td>data</td><td>data</td><td>data</td></tr>
+                <tr><td>data</td><td>data</td><td>data</td><td>data</td></tr>
+                <tr class="alt"><td>data</td><td>data</td><td>data</td><td>data</td></tr>
+                <tr><td>data</td><td>data</td><td>data</td><td>data</td></tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <div id="paging">
+                            <ul>
+                                <li><a href="#"><span>Previous</span></a></li>
+                                <li><a href="#" class="active"><span>1</span></a></li>
+                                <li><a href="#"><span>2</span></a></li>
+                                <li><a href="#"><span>3</span></a></li>
+                                <li><a href="#"><span>4</span></a></li>
+                                <li><a href="#"><span>5</span></a></li>
+                                <li><a href="#"><span>Next</span></a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+
+        </table>
+    </div>
+*/
+    .contenedor_centrar {
+        text-align: center;/* requerido para alineación horizontal */
+    }
+    .contenedor960 {
+        display: inline-block;
+        width: 960px; 
+    }
+    .contenedor800 {
+        display: inline-block;
+        width: 800px; 
+    }
+    .contenedor600 {
+        display: inline-block;
+        width: 600px; 
+    }
+    .contenedor300 {
+        display: inline-block;
+        width: 300px; 
+    }
+    .datagrid table { 
+        border-collapse: collapse; 
+        text-align: left; 
+        width: 100%; 
+    } 
+    .datagrid {
+        font: normal 12px/150% Verdana, Arial, Helvetica, sans-serif; 
+        background: #fff; 
+        overflow: hidden; 
+        border: 1px solid #8C8C8C; 
+        -webkit-border-radius: 5px; 
+        -moz-border-radius: 5px; 
+        border-radius: 5px; 
+        width: 100%;
+        margin-left: 3px;
+    }
+    .datagrid table td, .datagrid table th { 
+        padding: 2px 5px; 
+    }
+    .datagrid table thead th {
+        background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #8C8C8C), color-stop(1, #7D7D7D) );
+        background:-moz-linear-gradient( center top, #8C8C8C 5%, #7D7D7D 100% );
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8C8C8C', endColorstr='#7D7D7D');
+        background-color:#8C8C8C; 
+        color:#FFFFFF; 
+        font-size: 12px; 
+        font-weight: bold; 
+        border-left: 1px solid #A3A3A3; 
+        text-align: center;
+    } 
+    .datagrid table thead th:first-child { 
+        border: none; 
+    }
+    .datagrid table tbody td { 
+        color: #000000; 
+        border-left: 1px solid #DBDBDB;
+        font-size: 12px;
+        font-weight: normal; 
+        border: 1px solid #DBDBDB;
+    }
+    .datagrid table tbody .peq td { 
+        font-size: 10px;
+        font-weight: normal; 
+    }
+    .datagrid table tbody .alt td { 
+        background: #EBEBEB; 
+        color: #7D7D7D; 
+    }
+    .datagrid table tbody td:first-child { 
+        border-left: none; 
+    }
+    .datagrid table tbody tr:last-child td { 
+        border-bottom: none; 
+    }
+    .datagrid table tfoot td div { 
+        border-top: 1px solid #8C8C8C;
+        background: #EBEBEB;
+    } 
+    .datagrid table tfoot td { 
+        padding: 0; 
+        font-size: 10px; 
+    }
+    .datagrid table tfoot_n td { 
+        padding: 0; 
+        font-size: 12px; 
+    } 
+    .datagrid table tfoot td div{ 
+        padding: 2px; 
+    }
+    .datagrid table tfoot td ul { 
+        margin: 0; 
+        padding:0; 
+        list-style: none; 
+        text-align: right; 
+    }
+    .datagrid table tfoot li { 
+        display: inline; 
+    }
+    .datagrid table tfoot li a { 
+        text-decoration: none; 
+        display: inline-block;  
+        padding: 2px 8px; 
+        margin: 1px;
+        color: #F5F5F5;
+        border: 1px solid #8C8C8C;
+        -webkit-border-radius: 3px; 
+        -moz-border-radius: 3px; 
+        border-radius: 3px; 
+        background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #8C8C8C), color-stop(1, #7D7D7D) );
+        background:-moz-linear-gradient( center top, #8C8C8C 5%, #7D7D7D 100% );
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#8C8C8C', endColorstr='#7D7D7D');
+        background-color:#8C8C8C; 
+    }
+    .datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover { 
+        text-decoration: none;
+        border-color: #7D7D7D; 
+        color: #F5F5F5; 
+        background: none; 
+        background-color:#8C8C8C;
+    }
+    div.dhtmlx_window_active, div.dhx_modal_cover_dv { 
+        position: fixed !important; 
+    }
+    
+    .datagrid2 {
+        font: normal 12px/150% Verdana, Arial, Helvetica, sans-serif; 
+        background: #fff; 
+        overflow: hidden; 
+        border: 0px solid #8C8C8C; 
+        -webkit-border-radius: 5px; 
+        -moz-border-radius: 5px; 
+        border-radius: 5px; 
+        width: 100%;
+        margin-left: 3px;
+    }
+    .datagrid2 table { 
+        border-collapse: collapse; 
+        text-align: left; 
+        width: 100%; 
+    }
+    .datagrid2 table tbody td { 
+        color: #000000; 
+        border-left: 1px solid #DBDBDB;
+        font-size: 12px;
+        font-weight: normal; 
+        border: 0px solid #DBDBDB;
+    }
+    
+    /* ---------------- Botones -------------*/
+    .btn_normal{
+        text-decoration: none;
+        padding: 4px;
+        font-weight: 600;
+        font-size: 12px;
+        color: #000000;
+        background-color: #cccccc;
+        border-radius: 6px;
+        border: 2px solid #cccccc;
+        vertical-align: bottom;
+    }
+    .btn_normal:hover{
+        color: #000000;
+        background-color: #ffffff;
+        text-decoration: none;
+    }
+    .btn_normal_p{
+        text-decoration: none;
+        padding: 4px;
+        font-weight: 400;
+        font-size: 10px;
+        color: #000000;
+        background-color: #dddddd;
+        border-radius: 6px;
+        border: 2px solid #dddddd;
+        height: 20px;
+        line-height: 3px;
+    }
+    .btn_normal_p:hover{
+        color: #000000;
+        background-color: #ffffff;
+        text-decoration: none;
+    }
+    .btn_cmd_normal{
+        border: none;
+        background: #cccccc;
+        color: #222222;
+        padding: 4px;
+        font-size: 12px;
+        border-radius: 3px;
+        position: relative;
+        box-sizing: border-box;
+        transition: all 400ms ease;
+    }
+    .btn_cmd_normal:hover{
+        background: rgba(0,0,0,0);
+        color: #3a7999;
+        box-shadow: inset 0 0 0 3px #3a7999;
+    }
+    .btn_cmd_normal_p{
+        border: none;
+        background: #cccccc;
+        color: #222222;
+        padding: 4px;
+        font-size: 10px;
+        border-radius: 3px;
+        position: relative;
+        box-sizing: border-box;
+        transition: all 400ms ease;
+    }
+    .btn_cmd_normal_p:hover{
+        background: rgba(0,0,0,0);
+        color: #3a7999;
+        box-shadow: inset 0 0 0 3px #3a7999;
+    }

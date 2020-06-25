@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>{Aplicacion}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<link href="cc/css/adm_est.css" rel="stylesheet" type="text/css">
+</head>
+<body leftmargin="0" topmargin="0" onLoad="this.document.form1.dbname.focus()">
+<table width="800" border="1" bordercolor="#{ColorCorp}" cellspacing="0" align="center" class="normal">
+    <tr> 
+        <td bgcolor="#{ColorCorp}" class="titulo_mn"><b>Crear Clases de Base de Datos</b></td>
+    </tr>
+</table>
+
+<table width="800" border="1" bordercolor="#{ColorCorp2}" cellspacing="0" align="center" class="normal">
+    <tr> 
+        <td>Carpeta conexion:</td>
+        <td>
+            <input type="text" class="normal" name="dirconexion" maxlength="255" size="70" placeholder="" value="{DirConexion}" disabled>
+        </td>
+    </tr>
+    <tr><td colspan="2" height="4" bgcolor="#{ColorCorp2}"></td></tr>
+        <form name="form1" method="post" action="{PaginaDestino}">
+    <tr> 
+        <td>Host:</td>
+        <td>
+            <input type="text" class="normal" name="host" maxlength="15" size="15" placeholder="localhost" value="{Host}">
+        </td>
+    </tr>
+    <tr> 
+        <td>DB:</td>
+        <td>
+            <input type="text" class="normal" name="dbname" maxlength="15" size="15" placeholder="base de datos" value="{DBName}">
+        </td>
+    </tr> 
+    <tr> 
+        <td>User:</td>
+        <td>
+            <input type="text" class="normal" name="user" maxlength="50" size="40" placeholder="usuario" value="{User}">
+        </td>
+    </tr>
+    <tr> 
+        <td>Password:</td>
+        <td>
+            <input type="password" class="normal" name="pass" maxlength="50" size="40" placeholder="password" value="{Pass}">
+        </td>
+    </tr>
+    <tr> 
+        <td>Prefijo tablas:</td>
+        <td>
+            <input type="text" class="normal" name="prefijo" maxlength="5" size="5" placeholder="" value="{Prefijo}">
+        </td>
+    </tr>
+    <tr> 
+        <td>Carpeta clases:</td>
+        <td>
+            <input type="text" class="normal" name="dirclases" maxlength="255" size="70" placeholder="" value="{DirClases}">
+        </td>
+    </tr>
+    <tr> 
+        <td>Autor:</td>
+        <td>
+            <input type="text" class="normal" name="autor" maxlength="255" size="70" placeholder="" value="{Autor}">
+        </td>
+    </tr> 
+    <tr> 
+        <td>Version clase:</td>
+        <td>
+            <input type="text" class="normal" name="version" maxlength="10" size="10" placeholder="" value="{Version}" placeholder="1.0">
+        </td>
+    </tr> 
+    <tr bgcolor="#{ColorCorp2}"> 
+        <td colspan="2" align="center"> 
+            <input type="hidden" name="cmd" value="{Comando}"> 
+            <input type="submit" class="normal" name="cmdAceptar" value="Seleccionar Tabla"> 
+            <input type="button" class="normal" name="cmdCancelar" value="Cerrar" onClick="javascript:window.close();">
+            {BotonEliminar} 
+        </td>
+    </tr>
+        </form>
+</table>
+</body>
+</html>
