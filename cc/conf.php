@@ -5,7 +5,7 @@ Autor:          Dario Soto Diaz
 Version:        1.0
 Descripcion:    establece valores iniciales y globales de la aplicacion
 Fecha Ini.:     02-06-2020
-Fecha Mod.:     02-06-2020
+Fecha Mod.:     21-07-2020
 */
 
 //datos sesion
@@ -28,7 +28,7 @@ define('CONF_APP_COLOR_CORP_2','33CCFF');//cyan 33CCFF
 define('CONF_APP_VERSION','1.0');
 define('CONF_APP_DIR_INC',CONF_APP_DIR.DIRECTORY_SEPARATOR.'inc');
 define('CONF_APP_DIR_CLASSES',CONF_APP_DIR_INC.DIRECTORY_SEPARATOR.'classes');
-define('CONF_APP_CREATE_VALIDATE_CLASS',true);
+define('CONF_APP_CREATE_SPANISH_METHODS',true);//crea los nombre de los metodos publicos en spanish
 
 //variables notificacion funciones
 $m_error='';

@@ -13,7 +13,7 @@
 * Version:      1.0
 * Descripcion:  obtiene los datos de una tabla de una base de datos
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    15-06-2020
+* Fecha Mod:    21-07-2020
 *******************************************************************************/
 class TableDescriptor {
     private $table;
@@ -95,20 +95,20 @@ class TableDescriptor {
 * Descripcion:  Genera funciones get/set, load/add/update/delete para una tabla 
                 espefifica de una base de datos.
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    15-06-2020
+* Fecha Mod:    21-07-2020
 *******************************************************************************/
 class CreateClassDB{
-    private $buffer='';
-    private $validate;
-    private $prefijo='';
-    private $autor='';
-    private $descripcion='';
-    private $version='';
+    private $buffer = '';
+    private $prefijo = '';
+    private $autor = '';
+    private $descripcion = '';
+    private $version = '';
+    private $spanish = false;
     public $table_descriptor;
-    public $class_name='';
-    public $pk='';
-    public $pk_type='';
-    public $Error='';
+    public $class_name = '';
+    public $pk = '';
+    public $pk_type = '';
+    public $Error = '';
     private $variable_types = array(
         "int"       => "int",
         "text"      => "string",
@@ -146,7 +146,7 @@ class CreateClassDB{
         "timestamp" => "''"
         );
     
-    public function __construct(&$db,$table,$classname='',$prefijo='',$validate=false,$autor='',$descripcion='',$version='',$es_coleccion=false){
+    public function __construct(&$db,$table,$classname='',$prefijo='',$autor='',$descripcion='',$version='',$spanish=false,$es_coleccion=false){
         if($table==''){
             $this->Error='Falta nombre de la tabla';
             return false;
@@ -165,11 +165,11 @@ class CreateClassDB{
             }
         }
         $this->prefijo = $prefijo;
-        $this->validate = $validate;
         //para cabecera de la clase a generar
         $this->autor = $autor;
         $this->descripcion = $descripcion;
         $this->version = $version;
+        $this->spanish = $spanish;
         //carga clase
         $this->Load();
     }
@@ -246,7 +246,7 @@ class CreateClassDB{
         $buf .= "\t"."\t"."\t"."\$this->Error='valor $this->pk no valido';"."\n";
 		$buf .= "\t"."\t"."\t"."return false;"."\n";
 		$buf .= "\t"."\t"."}"."\n";
-        $buf .= "\t"."\t"."if(!\$this->Load()){;\n";
+        $buf .= "\t"."\t"."if(!\$this->Load()){\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n";
 		$buf .= "\t"."\t"."}"."\n"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
@@ -255,6 +255,7 @@ class CreateClassDB{
         //-------------------------- Load() ------------------------------------------------------------
         $buf .= "\t"."private function Load(){"."\n";
         $buf .= "\t"."\t"."\$query = \"SELECT * FROM " . $this->table_descriptor->getTable() . " WHERE `$this->pk`=:id\";"."\n";
+        $buf .= "\t"."\t"."\$rs=array();"."\n";
         $buf .= "\t"."\t"."\$rs[0]['campo']='id';"."\n";
         $buf .= "\t"."\t"."\$rs[0]['valor']=\$this->getID();"."\n";
         $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
@@ -316,7 +317,11 @@ class CreateClassDB{
         $insert_values  = rtrim($insert_values,',');
         $params = rtrim($params,',');
 
-        $buf .= "\t"."public function Add(". $insert_vars."){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."public function Agregar(". $insert_vars."){"."\n";
+        }else{
+            $buf .= "\t"."public function Add(". $insert_vars."){"."\n";
+        }
 
         //comprueba si la clase esta instanciada
         $buf .= "\t"."\t"."if(\$this->getID()){"."\n";
@@ -340,7 +345,11 @@ class CreateClassDB{
         
         //inserta funcion comprobacion requisitos de agregacion
         $buf .= "\t"."\t"."//comprueba requisitos agregacion"."\n";
-        $buf .= "\t"."\t"."if(!\$this->checkAdd()){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."\t"."if(!\$this->checkAgregar()){"."\n";
+        }else{
+            $buf .= "\t"."\t"."if(!\$this->checkAdd()){"."\n";
+        }
         $buf .= "\t"."\t"."\t"."return false;"."\n";
         $buf .= "\t"."\t"."}"."\n"."\n";
 
@@ -350,14 +359,14 @@ class CreateClassDB{
         $params = explode(',',$params);
         $values = explode(',',$insert_values);
         $cont=0;
-        $rs=array();
+        $buf .= "\t"."\t"."\$rs=array();"."\n";
         foreach($params as $p){
             $buf .= "\t"."\t"."\$rs[$cont]['campo']='$p';"."\n";
             $buf .= "\t"."\t"."\$rs[$cont]['valor']=$values[$cont];"."\n";
             $cont++;
         }
         $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
-        $buf .= "\t"."\t"."if(\$this->dblink->Error){;"."\n";
+        $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error=\$this->dblink->Error;"."\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n"; 
         $buf .= "\t"."\t"."}"."\n"."\n";
@@ -390,8 +399,12 @@ class CreateClassDB{
         $update_columns = rtrim($update_columns,',');
         $columns = rtrim($columns,',');
 
-        $buf .= "\t"."public function Update(){"."\n";
-
+        if($this->spanish){
+            $buf .= "\t"."public function Guardar(){"."\n";
+        }else{
+            $buf .= "\t"."public function Update(){"."\n";
+        }
+        
         //comprueba si la clase esta instanciada
         $buf .= "\t"."\t"."if(!\$this->getID()){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error='Clase no instanciada';"."\n";
@@ -403,7 +416,7 @@ class CreateClassDB{
         //forma array de valores
         $columns = explode(',',$columns);
         $cont=0;
-        $rs=array();
+        $buf .= "\t"."\t"."\$rs=array();"."\n";
         foreach($columns as $c){
             $buf .= "\t"."\t"."\$rs[$cont]['campo']='".strtolower($c)."';"."\n";
             $buf .= "\t"."\t"."\$rs[$cont]['valor']=\$this->get$c() ;"."\n";
@@ -412,7 +425,7 @@ class CreateClassDB{
         $buf .= "\t"."\t"."\$rs[$cont]['campo']='id';"."\n";
         $buf .= "\t"."\t"."\$rs[$cont]['valor']=\$this->getID() ;"."\n";
         $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
-        $buf .= "\t"."\t"."if(\$this->dblink->Error){;"."\n";
+        $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error=\$this->dblink->Error;"."\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n"; 
         $buf .= "\t"."\t"."}"."\n"."\n";
@@ -421,8 +434,12 @@ class CreateClassDB{
         
         //-------------------------- UpdateID() ----------------------------------------------------------
         if($this->pk_type != 'int'){
-            $buf .= "\t"."public function UpdateID(\$newid){"."\n";
-
+            if($this->spanish){
+                $buf .= "\t"."public function ActualizarID(\$newid){"."\n";
+            }else{
+                $buf .= "\t"."public function UpdateID(\$newid){"."\n";
+            }
+            
             //comprueba si la clase esta instanciada
             $buf .= "\t"."\t"."if(!\$this->getID()){"."\n";
             $buf .= "\t"."\t"."\t"."\$this->Error='Clase no instanciada';"."\n";
@@ -432,12 +449,13 @@ class CreateClassDB{
             $buf .= "\t"."\t"."\$query = \"UPDATE " . $this->table_descriptor->getTable() . " SET "."\n";
             $buf .= "\t"."\t"."\t"."\t"."\t"."`" . $this->pk . "` = :newid "."\n";
             $buf .= "\t"."\t"."\t"."\t"."\t"."WHERE `$this->pk`=:id\";"."\n";
+            $buf .= "\t"."\t"."\$rs=array();"."\n";
             $buf .= "\t"."\t"."\$rs[0]['campo']='newid';"."\n";
             $buf .= "\t"."\t"."\$rs[0]['valor']=\$newid;"."\n";
             $buf .= "\t"."\t"."\$rs[1]['campo']='id';"."\n";
             $buf .= "\t"."\t"."\$rs[1]['valor']=\$this->getID();"."\n";
             $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
-            $buf .= "\t"."\t"."if(\$this->dblink->Error){;"."\n";
+            $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
             $buf .= "\t"."\t"."\t"."\$this->Error=\$this->dblink->Error;"."\n";
             $buf .= "\t"."\t"."\t"."return false;"."\n"; 
             $buf .= "\t"."\t"."}"."\n"."\n";
@@ -450,7 +468,11 @@ class CreateClassDB{
         }
 
         //-------------------------- Delete() ------------------------------------------------------------
-        $buf .= "\t"."public function Delete(){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."public function Eliminar(){"."\n";
+        }else{
+            $buf .= "\t"."public function Delete(){"."\n";
+        }
 
         //comprueba si la clase esta instanciada
         $buf .= "\t"."\t"."if(!\$this->getID()){"."\n";
@@ -460,11 +482,16 @@ class CreateClassDB{
 
         //inserta funcion comprobacion requisitos de eliminacion
         $buf .= "\t"."\t"."//comprueba requisitos eliminacion"."\n";
-        $buf .= "\t"."\t"."if(!\$this->checkDelete()){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."\t"."if(!\$this->checkEliminar()){"."\n";
+        }else{
+            $buf .= "\t"."\t"."if(!\$this->checkDelete()){"."\n";
+        }
         $buf .= "\t"."\t"."\t"."return false;"."\n";
         $buf .= "\t"."\t"."}"."\n"."\n";
 
         $buf .= "\t"."\t"."\$query = \"DELETE FROM " . $this->table_descriptor->getTable() . " WHERE `$this->pk`=:id\";"."\n";
+        $buf .= "\t"."\t"."\$rs=array();"."\n";
         $buf .= "\t"."\t"."\$rs[0]['campo']='id';"."\n";
         $buf .= "\t"."\t"."\$rs[0]['valor']=\$this->getID() ;"."\n";
         $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
@@ -478,13 +505,21 @@ class CreateClassDB{
         $buf .= "\t"."}"."\n"."\n";
         
         //-------------------------- checkAdd() ------------------------------------------------------------
-        $buf .= "\t"."private function checkAdd(){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."private function checkAgregar(){"."\n";
+        }else{
+            $buf .= "\t"."private function checkAdd(){"."\n";
+        }
         $buf .= "\t"."\t"."//TODO: comprobar requisitos"."\n"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
 
         //-------------------------- checkDelete() ------------------------------------------------------------
-        $buf .= "\t"."private function checkDelete(){"."\n";
+        if($this->spanish){
+            $buf .= "\t"."private function checkEliminar(){"."\n";
+        }else{
+            $buf .= "\t"."private function checkDelete(){"."\n";
+        }
         $buf .= "\t"."\t"."//TODO: comprobar requisitos"."\n"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
@@ -552,59 +587,176 @@ class CreateClassDB{
         }
 
         $buf .= "} // END class {$this->class_name}"."\n"."\n";
-
-        if (CONF_APP_CREATE_VALIDATE_CLASS){
-            $buf .= "\n"."/******************************************************************************"."\n";
-            $buf .= "* Clase: validate" . "\n";
-            $buf .= "* Autor: " . $this->autor . "\n";
-            $buf .= "* Version: " . $this->version . "\n";
-            $buf .= "* Descripcion: crea funciones de validacion de propiedades" . "\n";
-            $buf .= "* Fecha Ini: " . date('d-m-Y') . "\n";
-            $buf .= "* Fecha Mod: " . date('d-m-Y') . "\n";
-            $buf .= "*******************************************************************************/"."\n"."\n";
-            $buf .= "class validate {"."\n";
-            
-            $buf .= "\t"."public static function isstring(\$string){"."\n";
-            $buf .= "\t"."\t"."return (is_string(\$string));"."\n";
-            $buf .= "\t".'}'."\n";
-            $buf .= "\n";
-            
-            $buf .= "\t"."public static function isint(\$int){"."\n";
-            $buf .= "\t"."\t"."return (preg_match(\"/^([0-9.,-]+)$/\", \$int) > 0);"."\n";
-            $buf .= "\t".'}'."\n";
-            $buf .= "\n";
-            
-            $buf .= "\t"."public static function isbool(\$bool){"."\n";
-            $buf .= "\t"."\t"."\$b = 1 * \$bool;"."\n";
-            $buf .= "\t"."\t"."return (\$b == 1 || \$b == 0);"."\n";
-            $buf .= "\t".'}'."\n";
-            $buf .= "\n";
-            
-            $buf .= "\t"."public static function isdate(\$date,\$sql=true){"."\n";
-            $buf .= "\t"."\t"."if(is_null(\$date)){"."\n";
-            $buf .= "\t"."\t"."\t"."return false;"."\n";
-            $buf .= "\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."\$usdate=str_replace('/', '-', \$date);"."\n";
-            $buf .= "\t"."\t"."if(\$sql){"."\n";
-            $buf .= "\t"."\t"."\t"."list(\$year,\$month,\$day) = explode('-',\$usdate);"."\n";
-            $buf .= "\t"."\t"."}else{"."\n";
-            $buf .= "\t"."\t"."\t"."list(\$day,\$month,\$year) = explode('-',\$usdate);"."\n";
-            $buf .= "\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."if(!checkdate(\$month, \$day, \$year)){"."\n";
-            $buf .= "\t"."\t"."\t"."return false;"."\n";
-            $buf .= "\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."return true;"."\n";
-            $buf .= "\t"."}"."\n";
-            $buf .= "\n";
-            
-            $buf .= "}"."\n";
-            $buf .= "\n";
-        }
         
         $this->buffer = $buf;
     }
 
-    public function Get() {
+    public function getClass() {
         return $this->buffer; 
+    }
+
+    public function getValidate(){
+        $buf .= "\n"."/******************************************************************************"."\n";
+        $buf .= "* Clase: validate" . "\n";
+        $buf .= "* Autor: " . $this->autor . "\n";
+        $buf .= "* Version: " . $this->version . "\n";
+        $buf .= "* Descripcion: crea funciones de validacion de propiedades" . "\n";
+        $buf .= "* Fecha Ini: " . date('d-m-Y') . "\n";
+        $buf .= "* Fecha Mod: " . date('d-m-Y') . "\n";
+        $buf .= "*******************************************************************************/"."\n"."\n";
+        $buf .= "class validate {"."\n";
+        
+        $buf .= "\t"."public static function isstring(\$string){"."\n";
+        $buf .= "\t"."\t"."return (is_string(\$string));"."\n";
+        $buf .= "\t".'}'."\n";
+        $buf .= "\n";
+        
+        $buf .= "\t"."public static function isint(\$int){"."\n";
+        $buf .= "\t"."\t"."return (preg_match(\"/^([0-9.,-]+)$/\", \$int) > 0);"."\n";
+        $buf .= "\t".'}'."\n";
+        $buf .= "\n";
+        
+        $buf .= "\t"."public static function isbool(\$bool){"."\n";
+        $buf .= "\t"."\t"."\$b = 1 * \$bool;"."\n";
+        $buf .= "\t"."\t"."return (\$b == 1 || \$b == 0);"."\n";
+        $buf .= "\t".'}'."\n";
+        $buf .= "\n";
+        
+        $buf .= "\t"."public static function isdate(\$date,\$sql=true){"."\n";
+        $buf .= "\t"."\t"."if(is_null(\$date)){"."\n";
+        $buf .= "\t"."\t"."\t"."return false;"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."\$usdate=str_replace('/', '-', \$date);"."\n";
+        $buf .= "\t"."\t"."if(\$sql){"."\n";
+        $buf .= "\t"."\t"."\t"."list(\$year,\$month,\$day) = explode('-',\$usdate);"."\n";
+        $buf .= "\t"."\t"."}else{"."\n";
+        $buf .= "\t"."\t"."\t"."list(\$day,\$month,\$year) = explode('-',\$usdate);"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."if(!checkdate(\$month, \$day, \$year)){"."\n";
+        $buf .= "\t"."\t"."\t"."return false;"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."return true;"."\n";
+        $buf .= "\t"."}"."\n";
+        $buf .= "\n";
+        
+        $buf .= "}"."\n";
+        $buf .= "\n";
+
+        return $buf;
+    }
+
+    public function getCollection($order_col_name = ''){
+
+        //comprueba que exista el campo introducido
+        if($order_col_name != ''){
+            $check_col = false;
+            foreach($this->table_descriptor->getColumns() as $column){
+                if( $column['Field'] === $order_col_name ){
+                    $check_col = true;
+                }
+            }
+            if(!$check_col){
+                $this->Error = 'El campo para ordenar la coleccion no existe en la tabla '. $this->table_descriptor->getTable();
+                return false;
+            }
+        }
+
+        //pinta la clase coleccion agregando una s al final del nombre de la clase base
+        $buf = "";
+        $buf .= "\n"."/******************************************************************************"."\n";
+        $buf .= "* Clase: " . $this->class_name.'s' . "\n";
+        $buf .= "* Autor: " . $this->autor . "\n";
+        $buf .= "* Version: " . $this->version . "\n";
+        $buf .= "* Descripcion: crea coleccion clase " .$this->class_name. "\n";
+        $buf .= "* Fecha Ini: " . date('d-m-Y') . "\n";
+        $buf .= "* Fecha Mod: " . date('d-m-Y') . "\n";
+        $buf .= "*******************************************************************************/"."\n"."\n";
+        $buf .= "class ".$this->class_name."s"." {"."\n";
+
+        //crea propiedad publica para mostrar errores
+        $buf .= "\t"."/**"."\n";
+        $buf .= "\t"."* @var string\n";
+        $buf .= "\t"."* muestra los errores de la clase"."\n";
+        $buf .= "\t"."*/\n";
+        $buf .= "\t"."public \$Error = '';"."\n"."\n";
+
+        //crea propiedad privada para conexion base de datos
+        $buf .= "\t"."/**"."\n";
+        $buf .= "\t"."* @var dbPDO\n";
+        $buf .= "\t"."* conexion base de datos de la clase"."\n";
+        $buf .= "\t"."*/\n";
+        $buf .= "\t"."private \$dblink;"."\n"."\n";
+
+        //crea propiedad privada para mostrar numero de registros
+        $buf .= "\t"."/**"."\n";
+        $buf .= "\t"."* @var int\n";
+        $buf .= "\t"."* muestra numero de registros"."\n";
+        $buf .= "\t"."*/\n";
+        $buf .= "\t"."private \$NumRegs = 0;"."\n"."\n";
+
+        //crea propiedad privada coleccion de registros
+        $buf .= "\t"."/**"."\n";
+        $buf .= "\t"."* @var array\n";
+        $buf .= "\t"."* coleccion de registros"."\n";
+        $buf .= "\t"."*/\n";
+        $buf .= "\t"."private \$Detalle = 0;"."\n"."\n";
+
+        //-------------------------- __construct() ------------------------------------------------------------
+        $buf .= "\t"."public function __construct(&\$db,\$id_excluir=0){"."\n";
+        $buf .= "\t"."\t"."\$this->dblink=\$db;"."\n"."\n";
+        $buf .= "\t"."\t"."if(!\$this->Load(\$id_excluir)){\n";
+        $buf .= "\t"."\t"."\t"."return false;"."\n";
+        $buf .= "\t"."\t"."}"."\n"."\n";
+        $buf .= "\t"."\t"."return true;"."\n";
+        $buf .= "\t"."}"."\n"."\n";
+        
+        //-------------------------- Load() ------------------------------------------------------------
+        $buf .= "\t"."private function Load(\$id_excluir){"."\n";
+        $buf .= "\t"."\t"."if(\$id_excluir != 0){"."\n";
+        if($order_col_name != ''){
+            $buf .= "\t"."\t"."\t"."\$sql='SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :id ORDER BY " . $order_col_name . "';"."\n";
+        }else{
+            $buf .= "\t"."\t"."\t"."\$sql='SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :id ORDER BY " . $this->pk . "';"."\n";
+        }
+        $buf .= "\t"."\t"."\t"."\$rs[0]['campo']='id';"."\n";
+        $buf .= "\t"."\t"."\t"."\$rs[0]['valor']=\$id_excluir;"."\n";
+        $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
+        $buf .= "\t"."\t"."}else{"."\n";
+        if($order_col_name){
+            $buf .= "\t"."\t"."\t"."\$sql='SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "';"."\n";
+        }else{
+            $buf .= "\t"."\t"."\t"."\$sql='SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "';"."\n";
+        }
+        $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
+        $buf .= "\t"."\t"."\t"."\$this->Error=\$this->dblink->Error;"."\n";
+        $buf .= "\t"."\t"."\t"."return false;"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."\$this->NumRegs = \$this->dblink->num_rows();"."\n";
+        $buf .= "\t"."\t"."\$cont=0;"."\n";
+        $buf .= "\t"."\t"."while(\$this->dblink->next_record()){"."\n";
+        $buf .= "\t"."\t"."\t"."\$this->Detalle[\$cont]=\$this->dblink->f('". $this->pk ."');"."\n";
+        $buf .= "\t"."\t"."\t"."\$cont++;"."\n";
+        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."return true;"."\n";
+        $buf .= "\t"."}"."\n";
+            
+        //-------------------------- __destruct() ------------------------------------------------------------
+        $buf .= "\t"."public function __destruct(){"."\n";
+        $buf .= "\t"."\t"."\$this->dblink=null;"."\n";
+        $buf .= "\t"."}"."\n"."\n";
+
+        //-------------------------- Propiedades ------------------------------------------------------------
+        $buf .= "\t"."//------------------------------------ Propiedades -------------------------------------------"."\n"."\n";
+        $buf .= "\t"."public function getNumRegs(){"."\n";
+        $buf .= "\t"."\t"."return \$this->NumRegs;"."\n";
+        $buf .= "\t"."}"."\n"."\n";
+        $buf .= "\t"."public function getDetalle(){"."\n";
+        $buf .= "\t"."\t"."return \$this->Detalle;"."\n";
+        $buf .= "\t"."}"."\n";
+        $buf .= "}"."\n";
+
+        return $buf;
     }
 }

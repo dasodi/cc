@@ -5,7 +5,7 @@ Autor:          Dario Soto Diaz
 Version:        1.0
 Descripcion:    Encapsula conexion a BD mediante PDO
 Fecha Ini.:     02-06-2020
-Fecha Mod.:     16-06-2020
+Fecha Mod.:     21-07-2020
 */
 
 //define carpeta app
@@ -122,10 +122,35 @@ case 2://muestra tablas con formulario de seleccion
         $form .= '<td><b>nombre clase:</b></td>';
         $form .= '<td><input class="normal_p" type="text" name="classname" size="50" maxlength="50" value=""></td>';
         $form .= '</tr>'."\n";
+        $dir_classes = str_replace('__',DIRECTORY_SEPARATOR, $dir_classes_url);
+        if(file_exists($dir_classes.DIRECTORY_SEPARATOR.'validate.php')){
+            $form .= '<tr>'."\n";
+            $form .= '<td><b>crear clase <i>validate</i>:</b></td>';
+            $form .= '<td>ya existe</td>';
+            $form .= '</tr>'."\n";
+        }else{
+            $form .= '<tr>'."\n";
+            $form .= '<td><b>crear clase <i>validate</i>:</b></td>';
+            $form .= '<td><input class="normal_p" type="checkbox" name="validate"></td>';
+            $form .= '</tr>'."\n";
+        }
+        $form .= '<tr>'."\n";
+        $form .= '<td><b>metodos en spanish:</b></td>';
+        if(CONF_APP_CREATE_SPANISH_METHODS){
+            $form .= '<td><input class="normal_p" type="checkbox" name="spanish" checked></td>';
+        }else{
+            $form .= '<td><input class="normal_p" type="checkbox" name="spanish"></td>';
+        }
+        $form .= '</tr>'."\n";
         $form .= '<tr>'."\n";
         $form .= '<td><b>descripcion:</b></td>';
         $form .= '<td><input class="normal_p" type="text" name="descripcion" size="50" maxlength="255" value=""></td>';
         $form .= '</tr>'."\n";
+        $form .= '<tr>'."\n";
+        $form .= '<td><b>crear coleccion:</b></td>';
+        $form .= '<td><input class="normal_p" type="checkbox" name="coleccion">';
+        $form .= '<input class="normal_p" type="text" name="coleccion_order" size="50" maxlength="255" value="">';
+        $form .= '</td></tr>'."\n";
         $form .= '<tr>'."\n";
         $form .= '<td>&nbsp;</td>';
         $form .= '<td><input class="normal_p" type="submit" value="crear clase"></td>';
@@ -208,8 +233,35 @@ case 3:
         $classname='';
     }
 
+    //crea coleccion de la clase
+    if(isset($_POST['coleccion'])){
+        $coleccion = true;
+        if(isset($_POST['coleccion_order'])){
+            $coleccion_order = $_POST['coleccion_order'];
+        }else{
+            $coleccion_order = '';
+        }
+    }else{
+        $coleccion = false;
+        $coleccion_order = '';
+    }
+
+    //establece si crea o no clase validate adicional
+    if(isset($_POST['validate'])){
+        $validate = true;
+    }else{
+        $validate = false;
+    }
+
+    //establece si crea los nombres de los metodos en spanish
+    if(isset($_POST['spanish'])){
+        $spanish = true;
+    }else{
+        $spanish = false;
+    }
+
     //construye la clase para la tabla seleccionada
-    $c = new CreateClassDB($db,$tabla,$classname,$prefijo,true,$autor,$descripcion,$version);
+    $c = new CreateClassDB($db,$tabla,$classname,$prefijo,$autor,$descripcion,$version,$spanish);
     if($c->Error){
         $m_error='Error: '.$c->Error;
         header("Location: error.php?pag=$pagina&err_des=$m_error"); 
@@ -217,7 +269,7 @@ case 3:
     }
     
     //almacela buffer con la clase
-    $code=$c->Get();
+    $code_class = $c->getClass();
     
     //obtiene carpeta de clases
     if(!isset($_POST['dirclasses'])){
@@ -226,13 +278,35 @@ case 3:
         exit;
     }
     $dir_classes = str_replace('__',DIRECTORY_SEPARATOR, $_POST['dirclasses']);
+
+    //crea el archivo con el codigo de la clase
     $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'.php';
     if(file_exists($file)){
         unlink($file);
     }
-    
-    //crea el archivo con el codigo de la clase
-    file_put_contents($file, '<?php'."\n".$code);
+    file_put_contents($file, '<?php'."\n".$code_class);
+
+    if($coleccion){
+        $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'s.php';
+        if(file_exists($file)){
+            unlink($file);
+        }
+        $code_coleccion = $c->getCollection($coleccion_order);
+        if($code_coleccion === false){
+            $m_error='Error: Se ha creado la clase pero no se ha podido crear la coleccion: <br><br>'.$c->Error;
+            header("Location: error.php?pag=$pagina&err_des=$m_error"); 
+            exit;
+        }
+        file_put_contents($file, '<?php'."\n".$code_coleccion);
+    }
+
+    //crea la clase de validacion
+    if($validate && !file_exists($dir_classes.DIRECTORY_SEPARATOR.'validate.php')){
+        //obtiene el codigo
+        $code_validate = $c->getValidate();
+        //crea el archivo
+        file_put_contents($dir_classes.DIRECTORY_SEPARATOR.'validate.php', '<?php'."\n".$code_validate);
+    }
         
     //muestra la clase
     $plan=new Template;
@@ -244,7 +318,7 @@ case 3:
     $plan->set_var("BaseDatos",DB_NAME);
     $plan->set_var("ClassName",$classname);
     $plan->set_var("FileClass",$file);
-    $plan->set_var("Code",$code);
+    $plan->set_var("Code",$code_class.'<br>'.$code_coleccion.'<br>'.$code_validate);
     //convierte dir_classes para pasarlo por get
     $dir_classes_url=  str_replace(DIRECTORY_SEPARATOR, '__', $dir_classes);
     $btn = '<center><button onClick="javascript:window.location=\''.$pagina.'?dirclasses='.$dir_classes_url.'&prefijo='.$prefijo.'&autor='.$autor.'&version='.$version.'\'">volver</button></center>';
