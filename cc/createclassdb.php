@@ -699,7 +699,7 @@ class CreateClassDB{
         $buf .= "\t"."* @var array\n";
         $buf .= "\t"."* coleccion de registros"."\n";
         $buf .= "\t"."*/\n";
-        $buf .= "\t"."private \$Detalle = 0;"."\n"."\n";
+        $buf .= "\t"."private \$Detalle = array();"."\n"."\n";
 
         //-------------------------- __construct() ------------------------------------------------------------
         $buf .= "\t"."public function __construct(&\$db,\$id_excluir=0){"."\n";
@@ -740,7 +740,7 @@ class CreateClassDB{
         $buf .= "\t"."\t"."\t"."\$cont++;"."\n";
         $buf .= "\t"."\t"."}"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
-        $buf .= "\t"."}"."\n";
+        $buf .= "\t"."}"."\n"."\n";
             
         //-------------------------- __destruct() ------------------------------------------------------------
         $buf .= "\t"."public function __destruct(){"."\n";
