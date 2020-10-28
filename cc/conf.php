@@ -29,6 +29,7 @@ define('CONF_APP_VERSION','1.0');
 define('CONF_APP_DIR_INC',CONF_APP_DIR.DIRECTORY_SEPARATOR.'inc');
 define('CONF_APP_DIR_CLASSES',CONF_APP_DIR_INC.DIRECTORY_SEPARATOR.'classes');
 define('CONF_APP_CREATE_SPANISH_METHODS',true);//crea los nombre de los metodos publicos en spanish
+define('CONF_APP_PDO_CONNECTION',true);//crea las conexiones a la base de datos PDO por defecto
 
 //variables notificacion funciones
 $m_error='';

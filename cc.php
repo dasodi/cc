@@ -136,11 +136,19 @@ case 2://muestra tablas con formulario de seleccion
         }
         $form .= '<tr>'."\n";
         $form .= '<td><b>metodos en spanish:</b></td>';
+        $form .= '<td>';
         if(CONF_APP_CREATE_SPANISH_METHODS){
-            $form .= '<td><input class="normal_p" type="checkbox" name="spanish" checked></td>';
+            $form .= '<input class="normal_p" type="checkbox" name="spanish" checked>';
         }else{
-            $form .= '<td><input class="normal_p" type="checkbox" name="spanish"></td>';
+            $form .= '<input class="normal_p" type="checkbox" name="spanish">';
         }
+        $form .= "&nbsp;&nbsp;&nbsp;&nbsp;<b>tipo conexion PDO: </b>";
+        if(CONF_APP_PDO_CONNECTION){
+            $form .= '<input class="normal_p" type="checkbox" name="pdo" checked>';
+        }else{
+            $form .= '<input class="normal_p" type="checkbox" name="pdo">';
+        }
+        $form .= '</td>';
         $form .= '</tr>'."\n";
         $form .= '<tr>'."\n";
         $form .= '<td><b>descripcion:</b></td>';
@@ -149,7 +157,8 @@ case 2://muestra tablas con formulario de seleccion
         $form .= '<tr>'."\n";
         $form .= '<td><b>crear coleccion:</b></td>';
         $form .= '<td><input class="normal_p" type="checkbox" name="coleccion">';
-        $form .= '<input class="normal_p" type="text" name="coleccion_order" size="50" maxlength="255" value="">';
+        $form .= '&nbsp;&nbsp;&nbsp;&nbsp;<b>campo padre:</b> <input class="normal_p" type="text" name="campo_padre" size="20" maxlength="255" value="">';
+        $form .= '&nbsp;&nbsp;&nbsp;&nbsp;<b>ordenada por:</b> <input class="normal_p" type="text" name="coleccion_order" size="20" maxlength="255" value="">';
         $form .= '</td></tr>'."\n";
         $form .= '<tr>'."\n";
         $form .= '<td>&nbsp;</td>';
@@ -241,9 +250,15 @@ case 3:
         }else{
             $coleccion_order = '';
         }
+        if(isset($_POST['campo_padre'])){
+            $campo_padre = $_POST['campo_padre'];
+        }else{
+            $campo_padre = '';
+        }
     }else{
         $coleccion = false;
         $coleccion_order = '';
+        $campo_padre = '';
     }
 
     //establece si crea o no clase validate adicional
@@ -259,9 +274,16 @@ case 3:
     }else{
         $spanish = false;
     }
+    
+    //establece si crea conexion a bd tipo PDO o MySQLi
+    if(isset($_POST['pdo'])){
+        $pdo = true;
+    }else{
+        $pdo = false;
+    }
 
     //construye la clase para la tabla seleccionada
-    $c = new CreateClassDB($db,$tabla,$classname,$prefijo,$autor,$descripcion,$version,$spanish);
+    $c = new CreateClassDB($db,$tabla,$classname,$prefijo,$autor,$descripcion,$version,$spanish,$pdo);
     if($c->Error){
         $m_error='Error: '.$c->Error;
         header("Location: error.php?pag=$pagina&err_des=$m_error"); 
@@ -287,11 +309,11 @@ case 3:
     file_put_contents($file, '<?php'."\n".$code_class);
 
     if($coleccion){
-        $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'s.php';
+        $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'Col.php';
         if(file_exists($file)){
             unlink($file);
         }
-        $code_coleccion = $c->getCollection($coleccion_order);
+        $code_coleccion = $c->getCollection($coleccion_order,$campo_padre);
         if($code_coleccion === false){
             $m_error='Error: Se ha creado la clase pero no se ha podido crear la coleccion: <br><br>'.$c->Error;
             header("Location: error.php?pag=$pagina&err_des=$m_error"); 
