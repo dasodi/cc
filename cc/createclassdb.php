@@ -283,26 +283,40 @@ class CreateClassDB{
         $buf .= "\t"."\t"."\t"."return false;"."\n";
         $buf .= "\t"."\t"."}"."\n"."\n";
         $buf .= "\t"."\t"."//comprueba existe item"."\n";
-		$buf .= "\t"."\t"."if(\$this->dblink->num_rows() == 0){"."\n";
+        $buf .= "\t"."\t"."if(\$this->dblink->num_rows() == 0){"."\n";
         if($this->pk_type == 'int'){
             $buf .= "\t"."\t"."\t"."\$this->ID = 0;//borra ID"."\n";
         }else{
             $buf .= "\t"."\t"."\t"."\$this->ID = '';//borra ID"."\n";
         }
-		$buf .= "\t"."\t"."\t"."\$this->Error = 'item inexistente';"."\n";
-		$buf .= "\t"."\t"."\t"."return false;"."\n";
-		$buf .= "\t"."\t"."}"."\n"."\n";
-        $buf .= "\t"."\t"."while(\$row = \$this->dblink->next_record()){"."\n";
-        $buf .= "\t"."\t"."\t"."foreach(\$row as \$key => \$value)"."\n";
-        $buf .= "\t"."\t"."\t"."{"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."\$column_name = str_replace('-','_',\$key);"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."if(\$column_name == '$this->pk'){"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."\t"."\$this->ID = \$value;"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."}else{"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."\t"."\$this->{\$column_name} = \$value;"."\n";
-        $buf .= "\t"."\t"."\t"."\t"."}"."\n";
-        $buf .= "\t"."\t"."\t"."}"."\n";
-        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."\t"."\$this->Error = 'item inexistente';"."\n";
+        $buf .= "\t"."\t"."\t"."return false;"."\n";
+        $buf .= "\t"."\t"."}"."\n"."\n";
+        if($this->db_pdo){
+            $buf .= "\t"."\t"."while(\$row = \$this->dblink->next_record()){"."\n";
+            $buf .= "\t"."\t"."\t"."foreach(\$row as \$key => \$value)"."\n";
+            $buf .= "\t"."\t"."\t"."{"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."\$column_name = str_replace('-','_',\$key);"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."if(\$column_name == '$this->pk'){"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."\t"."\$this->ID = \$value;"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."}else{"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."\t"."\$this->{\$column_name} = \$value;"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."}"."\n";
+            $buf .= "\t"."\t"."\t"."}"."\n";
+            $buf .= "\t"."\t"."}"."\n";
+        }else{
+            $buf .= "\t"."\t"."\$this->dblink->next_record();"."\n"."\n";
+            $buf .= "\t"."\t"."\$fields = \$this->dblink->get_fields('". $this->table_descriptor->getTable() . "');"."\n";
+            $buf .= "\t"."\t"."foreach(\$fields as \$f)"."\n";
+            $buf .= "\t"."\t"."{"."\n";
+            $buf .= "\t"."\t"."\t"."\$column_name = str_replace('-','_',\$f['column']);"."\n";
+            $buf .= "\t"."\t"."\t"."if(\$column_name == '$this->pk'){"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."\$this->ID = \$this->dblink->f(\$f['column']);"."\n";
+            $buf .= "\t"."\t"."\t"."}else{"."\n";
+            $buf .= "\t"."\t"."\t"."\t"."\$this->{\$column_name} = \$this->dblink->f(\$f['column']);"."\n";
+            $buf .= "\t"."\t"."\t"."}"."\n";
+            $buf .= "\t"."\t"."}"."\n"."\n";
+        }
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
         
@@ -324,7 +338,7 @@ class CreateClassDB{
                             $params .= ":".strtolower($column_name).",";
                         }else{
                             if($this->variable_types[$column['Type']] == 'string'){
-                                $params .= "`%s`".",";
+                                $params .= "'%s'".",";
                             }else{
                                 $params .= "%s".",";
                             }
@@ -342,7 +356,7 @@ class CreateClassDB{
                         $params .= ":".strtolower($column_name).",";
                     }else{
                         if($this->variable_types[$column['Type']] == 'string'){
-                            $params .= "`%s`".",";
+                            $params .= "'%s'".",";
                         }else{
                             $params .= "%s".",";
                         }
@@ -404,9 +418,7 @@ class CreateClassDB{
             }
             $buf .= "\t"."\t"."\$this->dblink->query(\$query,\$rs);"."\n";
         }else{
-            $buf .= "\t"."\t"."\$query = sprintf(\"INSERT INTO {$this->table_descriptor->getTable()} ($insert_columns)"."\n";
-            $buf .= "\t"."\t"."\t"."\t"."\t"." VALUES ($params)\","."\n";
-            $buf .= "\t"."\t"."\t"."\t"."\t"."$insert_values);"."\n";
+            $buf .= "\t"."\t"."\$query = sprintf(\"INSERT INTO {$this->table_descriptor->getTable()} ($insert_columns) VALUES ($params)\", $insert_values);"."\n";
             $buf .= "\t"."\t"."\$this->dblink->query(\$query);"."\n";
         }
         $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
@@ -771,6 +783,7 @@ class CreateClassDB{
         $buf .= "\t"."private function Load(\$id_excluir){"."\n";
         $buf .= "\t"."\t"."if(\$id_excluir != 0){"."\n";
         if($this->db_pdo){
+            
             $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
             
                 if($order_col_name != ''){
@@ -828,8 +841,11 @@ class CreateClassDB{
                 }
             $buf .= "\t"."\t"."\t"."}"."\n";
             $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
+            
         }
+        
         $buf .= "\t"."\t"."}else{"."\n";
+        
         if($this->db_pdo){
             
             $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
