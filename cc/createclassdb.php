@@ -95,7 +95,7 @@ class TableDescriptor {
 * Descripcion:  Genera funciones get/set, load/add/update/delete para una tabla 
                 espefifica de una base de datos.
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    21-07-2020
+* Fecha Mod:    29-10-2020
 *******************************************************************************/
 class CreateClassDB{
     private $buffer = '';
@@ -771,15 +771,33 @@ class CreateClassDB{
         $buf .= "\t"."private function Load(\$id_excluir){"."\n";
         $buf .= "\t"."\t"."if(\$id_excluir != 0){"."\n";
         if($this->db_pdo){
-            if($order_col_name != ''){
-                $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :id ORDER BY " . $order_col_name . "';"."\n";
-            }else{
-                $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :id ORDER BY " . $this->pk . "';"."\n";
-            }
-            $buf .= "\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
-            $buf .= "\t"."\t"."\t"."\$rs[0]['valor'] = \$id_excluir;"."\n";
+            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
+            
+                if($order_col_name != ''){
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id AND " . $this->pk . " != :idex ORDER BY " . $order_col_name . "';"."\n";
+                }else{
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id AND " . $this->pk . " != :idex ORDER BY " . $this->pk . "';"."\n";
+                }
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$this->IdPadre;"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[1]['campo'] = 'idex';"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[1]['valor'] = \$id_excluir;"."\n";
+            
+            $buf .= "\t"."\t"."\t"."}else{"."\n";
+            
+                if($order_col_name != ''){
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :idex ORDER BY " . $order_col_name . "';"."\n";
+                }else{
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :idex ORDER BY " . $this->pk . "';"."\n";
+                }
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'idex';"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$id_excluir;"."\n";
+                
+            $buf .= "\t"."\t"."\t"."}"."\n";
             $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
+            
         }else{
+            
             $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
                 if($order_col_name != ''){
                     if($this->pk_type == 'int'){
@@ -813,11 +831,25 @@ class CreateClassDB{
         }
         $buf .= "\t"."\t"."}else{"."\n";
         if($this->db_pdo){
-            if($order_col_name){
-                $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "';"."\n";
-            }else{
-                $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "';"."\n";
-            }
+            
+            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
+                if($order_col_name){
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id " . " ORDER BY " . $order_col_name . "';"."\n";
+                }else{
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id " . " ORDER BY " . $this->pk . "';"."\n";
+                }
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$this->IdPadre;"."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
+            $buf .= "\t"."\t"."\t"."}else{"."\n";
+                if($order_col_name){
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "';"."\n";
+                }else{
+                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "';"."\n";
+                }
+                $buf .= "\t"."\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
+            $buf .= "\t"."\t"."\t"."}"."\n";
+            
         }else{
             $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
                 if($order_col_name){
@@ -832,8 +864,8 @@ class CreateClassDB{
                     $buf .= "\t"."\t"."\t"."\t"."\$sql= \"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "\";"."\n";
                 }
             $buf .= "\t"."\t"."\t"."}"."\n";
+            $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
         }
-        $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
         $buf .= "\t"."\t"."}"."\n";
         $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error = \$this->dblink->Error;"."\n";
