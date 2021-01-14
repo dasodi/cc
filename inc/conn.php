@@ -1,5 +1,5 @@
 <?php
-define(DB_HOST,'localhost');
-define(DB_NAME,'icont');
-define(DB_USER,'root');
-define(DB_PASS,'Star2002');
+define('DB_HOST','localhost');
+define('DB_NAME','smfv2');
+define('DB_USER','root');
+define('DB_PASS','Star2002');

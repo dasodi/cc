@@ -5,7 +5,7 @@ Autor:          Dario Soto Diaz
 Version:        1.0
 Descripcion:    Encapsula conexion a BD mediante PDO
 Fecha Ini.:     02-06-2020
-Fecha Mod.:     21-07-2020
+Fecha Mod.:     15-01-2021
 */
 
 //define carpeta app
@@ -122,6 +122,10 @@ case 2://muestra tablas con formulario de seleccion
         $form .= '<td><b>nombre clase:</b></td>';
         $form .= '<td><input class="normal_p" type="text" name="classname" size="50" maxlength="50" value=""></td>';
         $form .= '</tr>'."\n";
+        $form .= '<tr>'."\n";
+        $form .= '<td><b>espacio nombres:</b></td>';
+        $form .= '<td><input class="normal_p" type="text" name="namespace" size="50" maxlength="50" value=""></td>';
+        $form .= '</tr>'."\n";
         $dir_classes = str_replace('__',DIRECTORY_SEPARATOR, $dir_classes_url);
         if(file_exists($dir_classes.DIRECTORY_SEPARATOR.'validate.php')){
             $form .= '<tr>'."\n";
@@ -235,11 +239,18 @@ case 3:
         $descripcion='Anonimo';
     }
 
-    //obtiene descripcion
+    //obtiene nombre de la clase
     if(isset($_POST['classname'])){
         $classname=trim($_POST['classname']);
     }else{
         $classname='';
+    }
+
+    //obtiene espacio de nombres
+    if(isset($_POST['namespace'])){
+        $namespace=trim($_POST['namespace']);
+    }else{
+        $namespace='';
     }
 
     //crea coleccion de la clase
@@ -283,7 +294,7 @@ case 3:
     }
 
     //construye la clase para la tabla seleccionada
-    $c = new CreateClassDB($db,$tabla,$classname,$prefijo,$autor,$descripcion,$version,$spanish,$pdo);
+    $c = new CreateClassDB($db,$tabla,$classname,$namespace,$prefijo,$autor,$descripcion,$version,$spanish,$pdo);
     if($c->Error){
         $m_error='Error: '.$c->Error;
         header("Location: error.php?pag=$pagina&err_des=$m_error"); 
@@ -420,10 +431,10 @@ function setWriteConnFile($host,$dbname,$user,$pass){
         @ unlink($file);
     }
     $buf = "";
-    $buf .= "define(DB_HOST,'$host');"."\n";
-    $buf .= "define(DB_NAME,'$dbname');"."\n";
-    $buf .= "define(DB_USER,'$user');"."\n";
-    $buf .= "define(DB_PASS,'$pass');"."\n";
+    $buf .= "define('DB_HOST','$host');"."\n";
+    $buf .= "define('DB_NAME','$dbname');"."\n";
+    $buf .= "define('DB_USER','$user');"."\n";
+    $buf .= "define('DB_PASS','$pass');"."\n";
     //create file
     file_put_contents($file, '<?php'."\n".$buf);
 }

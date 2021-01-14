@@ -13,7 +13,7 @@
 * Version:      1.0
 * Descripcion:  obtiene los datos de una tabla de una base de datos
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    21-07-2020
+* Fecha Mod:    15-01-2021
 *******************************************************************************/
 class TableDescriptor {
     private $table;
@@ -95,7 +95,7 @@ class TableDescriptor {
 * Descripcion:  Genera funciones get/set, load/add/update/delete para una tabla 
                 espefifica de una base de datos.
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    29-10-2020
+* Fecha Mod:    13-11-2020
 *******************************************************************************/
 class CreateClassDB{
     private $buffer = '';
@@ -107,6 +107,7 @@ class CreateClassDB{
     private $db_pdo = true;
     public $table_descriptor;
     public $class_name = '';
+    public $name_space = '';
     public $pk = '';
     public $pk_type = '';
     public $Error = '';
@@ -149,7 +150,7 @@ class CreateClassDB{
         "timestamp" => "''"
         );
     
-    public function __construct(&$db,$table,$classname='',$prefijo='',$autor='',$descripcion='',$version='',$spanish=false,$pdo=true,$es_coleccion=false){
+    public function __construct(&$db,$table,$classname='',$namespace='',$prefijo='',$autor='',$descripcion='',$version='',$spanish=false,$pdo=true,$es_coleccion=false){
         if($table==''){
             $this->Error='Falta nombre de la tabla';
             return false;
@@ -167,6 +168,7 @@ class CreateClassDB{
                 $this->class_name = substr($this->class_name,0,strlen($this->class_name)-1);
             }
         }
+        $this->name_space = $namespace;
         $this->prefijo = $prefijo;
         //para cabecera de la clase a generar
         $this->autor = $autor;
@@ -195,6 +197,13 @@ class CreateClassDB{
         $buf .= "* Fecha Ini: " . date('d-m-Y') . "\n";
         $buf .= "* Fecha Mod: " . date('d-m-Y') . "\n";
         $buf .= "*******************************************************************************/"."\n"."\n";
+
+        //crea espacio de nombres
+        if($this->name_space){
+            $buf .= "namespace {$this->name_space}".";"."\n"."\n";
+        }
+
+        //crea clase
         $buf .= "class {$this->class_name}"."\n"."{"."\n";
         //crea propiedad publica para mostrar errores
         $buf .= "\t"."/**"."\n";
@@ -591,7 +600,7 @@ class CreateClassDB{
             }
             $buf .= "\t"."\t"."\$this->dblink->query(\$query);"."\n";
         }
-        $buf .= "\t"."\t"."if(\$this->dblink->Error){;"."\n";
+        $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error = \$this->dblink->Error;"."\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n"; 
         $buf .= "\t"."\t"."}"."\n"."\n";
@@ -603,6 +612,11 @@ class CreateClassDB{
         }
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
+        
+        //-------------------------- marca area funciones privadas -----------------------------------------
+        $buf .= "\t"."//-----------------------------------------------------------------------------------------"."\n";
+        $buf .= "\t"."//------------------------------ funciones privadas ---------------------------------------"."\n";
+        $buf .= "\t"."//-----------------------------------------------------------------------------------------"."\n"."\n";
         
         //-------------------------- checkAdd() ------------------------------------------------------------
         if($this->spanish){
