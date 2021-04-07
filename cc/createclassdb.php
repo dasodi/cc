@@ -458,7 +458,7 @@ class CreateClassDB{
                     $param = ":".strtolower($column_name);
                 }else{
                     if($this->variable_types[$column['Type']] == 'string'){
-                        $param = "`%s`";
+                        $param = "'%s'";
                     }else{
                         $param = "%s";
                     }
@@ -502,7 +502,7 @@ class CreateClassDB{
             if($this->pk_type == 'int'){
                 $buf .= "\t"."\t"."\t"."\t"."\t"."WHERE `$this->pk` = %s\","."\n";
             }else{
-                $buf .= "\t"."\t"."\t"."\t"."\t"."WHERE `$this->pk` = `%s`\","."\n";
+                $buf .= "\t"."\t"."\t"."\t"."\t"."WHERE `$this->pk` = '%s'\","."\n";
             }
             $columns = explode(',',$columns);
             $update_values = "";
