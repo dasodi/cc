@@ -5,7 +5,7 @@ Autor:          Dario Soto Diaz
 Version:        1.0
 Descripcion:    Encapsula conexion a BD mediante PDO
 Fecha Ini.:     02-06-2020
-Fecha Mod.:     15-01-2021
+Fecha Mod.:     28-04-2021
 */
 
 //define carpeta app
@@ -320,7 +320,7 @@ case 3:
     file_put_contents($file, '<?php'."\n".$code_class);
 
     if($coleccion){
-        $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'Col.php';
+        $file=$dir_classes.DIRECTORY_SEPARATOR.strtolower($c->class_name).'col.php';
         if(file_exists($file)){
             unlink($file);
         }

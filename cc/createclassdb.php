@@ -13,7 +13,7 @@
 * Version:      1.0
 * Descripcion:  obtiene los datos de una tabla de una base de datos
 * Fecha Ini:    05-06-2020
-* Fecha Mod:    15-01-2021
+* Fecha Mod:    28-04-2021
 *******************************************************************************/
 class TableDescriptor {
     private $table;
@@ -703,7 +703,15 @@ class CreateClassDB{
     }
 
     public function getCollection($order_col_name = '',$col_name_padre = ''){
-
+        
+        if($order_col_name == ''){
+            return 'Falta el campo de ordenacion de la coleccion para tabla '. $this->table_descriptor->getTable();
+        }
+        
+        if($order_col_name == ''){
+            return 'Falta un campo padre de la coleccion para tabla '. $this->table_descriptor->getTable();
+        }
+        
         //comprueba que exista el campo introducido
         if($order_col_name != ''){
             $check_col = false;
@@ -713,8 +721,7 @@ class CreateClassDB{
                 }
             }
             if(!$check_col){
-                $this->Error = 'No existe el campo '.$order_col_name.' para ordenar en la tabla '. $this->table_descriptor->getTable();
-                return false;
+                return 'No existe el campo '.$order_col_name.' para ordenar en la tabla '. $this->table_descriptor->getTable();
             }
         }
         
@@ -727,8 +734,7 @@ class CreateClassDB{
                 }
             }
             if(!$check_col){
-                $this->Error = 'No existe el campo padre '.$col_name_padre.' en la tabla '. $this->table_descriptor->getTable();
-                return false;
+                return 'No existe el campo padre '.$col_name_padre.' en la tabla '. $this->table_descriptor->getTable();
             }
         }
 
@@ -784,129 +790,63 @@ class CreateClassDB{
         $buf .= "\t"."public \$Detalle = array();"."\n"."\n";
 
         //-------------------------- __construct() ------------------------------------------------------------
-        $buf .= "\t"."public function __construct(&\$db,\$idpadre=0,\$id_excluir=0){"."\n";
+        $buf .= "\t"."public function __construct(&\$db,\$idpadre=0){"."\n";
         $buf .= "\t"."\t"."\$this->dblink = \$db;"."\n";
         $buf .= "\t"."\t"."\$this->IdPadre = \$idpadre;"."\n"."\n";
-        $buf .= "\t"."\t"."if(!\$this->Load(\$id_excluir)){\n";
+        $buf .= "\t"."\t"."if(!\$this->Load()){\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n";
         $buf .= "\t"."\t"."}"."\n"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
         
         //-------------------------- Load() ------------------------------------------------------------
-        $buf .= "\t"."private function Load(\$id_excluir){"."\n";
-        $buf .= "\t"."\t"."if(\$id_excluir != 0){"."\n";
-        if($this->db_pdo){
-            
-            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
-            
-                if($order_col_name != ''){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id AND " . $this->pk . " != :idex ORDER BY " . $order_col_name . "';"."\n";
-                }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id AND " . $this->pk . " != :idex ORDER BY " . $this->pk . "';"."\n";
-                }
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$this->IdPadre;"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[1]['campo'] = 'idex';"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[1]['valor'] = \$id_excluir;"."\n";
-            
-            $buf .= "\t"."\t"."\t"."}else{"."\n";
-            
-                if($order_col_name != ''){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :idex ORDER BY " . $order_col_name . "';"."\n";
-                }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != :idex ORDER BY " . $this->pk . "';"."\n";
-                }
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'idex';"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$id_excluir;"."\n";
-                
-            $buf .= "\t"."\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
-            
-        }else{
-            
-            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
-                if($order_col_name != ''){
-                    if($this->pk_type == 'int'){
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . "," . $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s AND " . $this->pk . " != %s ORDER BY " . $order_col_name . "\",\$this->IdPadre,\$id_excluir);"."\n";
-                    }else{
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . "," . $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s AND " . $this->pk . " != '%s' ORDER BY " . $order_col_name . "\",\$this->IdPadre,\$id_excluir);"."\n";
-                    }
-                }else{
-                    if($this->pk_type == 'int'){
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s AND " . $this->pk . " != %s ORDER BY " . $this->pk . "\",\$this->IdPadre,\$id_excluir);"."\n";
-                    }else{
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s AND " . $this->pk . " != '%s' ORDER BY " . $this->pk . "\",\$this->IdPadre,\$id_excluir);"."\n";
-                    }
-                }
-            $buf .= "\t"."\t"."\t"."}else{"."\n";
-                if($order_col_name != ''){
-                    if($this->pk_type == 'int'){
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . "," . $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != %s ORDER BY " . $order_col_name . "\",\$id_excluir);"."\n";
-                    }else{
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . "," . $order_col_name . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != '%s' ORDER BY " . $order_col_name . "\",\$id_excluir);"."\n";
-                    }
-                }else{
-                    if($this->pk_type == 'int'){
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != %s ORDER BY " . $this->pk . "\",\$id_excluir);"."\n";
-                    }else{
-                        $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE " . $this->pk . " != '%s' ORDER BY " . $this->pk . "\",\$id_excluir);"."\n";
-                    }
-                }
-            $buf .= "\t"."\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
-            
-        }
-        
-        $buf .= "\t"."\t"."}else{"."\n";
+        $buf .= "\t"."private function Load(){"."\n";
         
         if($this->db_pdo){
             
-            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
+            $buf .= "\t"."\t"."if(\$this->IdPadre > 0){"."\n";
                 if($order_col_name){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id " . " ORDER BY " . $order_col_name . "';"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id" . " ORDER BY " . $order_col_name . "';"."\n";
                 }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id " . " ORDER BY " . $this->pk . "';"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = :id" . " ORDER BY " . $this->pk . "';"."\n";
                 }
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$rs[0]['valor'] = \$this->IdPadre;"."\n";
-                $buf .= "\t"."\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
-            $buf .= "\t"."\t"."\t"."}else{"."\n";
+                $buf .= "\t"."\t"."\t"."\$rs[0]['campo'] = 'id';"."\n";
+                $buf .= "\t"."\t"."\t"."\$rs[0]['valor'] = \$this->IdPadre;"."\n";
+                $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql,\$rs);"."\n";
+            $buf .= "\t"."\t"."}else{"."\n";
                 if($order_col_name){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "';"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . ", ". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "';"."\n";
                 }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "';"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = 'SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "';"."\n";
                 }
-                $buf .= "\t"."\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
-            $buf .= "\t"."\t"."\t"."}"."\n";
+                $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
+            $buf .= "\t"."\t"."}"."\n";
             
         }else{
-            $buf .= "\t"."\t"."\t"."if(\$this->IdPadre > 0){"."\n";
+            $buf .= "\t"."\t"."if(\$this->IdPadre > 0){"."\n";
                 if($order_col_name){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . ",". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s" . " ORDER BY " . $order_col_name . "\",\$this->IdPadre);"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = sprintf(\"SELECT " . $this->pk . ",". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " WHERE $col_name_padre = %s" . " ORDER BY " . $order_col_name . "\",\$this->IdPadre);"."\n";
                 }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql= sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable()  . " WHERE $col_name_padre = %s" . " ORDER BY " . $this->pk . "\",\$this->IdPadre);"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql= sprintf(\"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable()  . " WHERE $col_name_padre = %s" . " ORDER BY " . $this->pk . "\",\$this->IdPadre);"."\n";
                 }
-            $buf .= "\t"."\t"."\t"."}else{"."\n";
+            $buf .= "\t"."\t"."}else{"."\n";
                 if($order_col_name){
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql = \"SELECT " . $this->pk . ",". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "\";"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql = \"SELECT " . $this->pk . ",". $order_col_name. " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $order_col_name . "\";"."\n";
                 }else{
-                    $buf .= "\t"."\t"."\t"."\t"."\$sql= \"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "\";"."\n";
+                    $buf .= "\t"."\t"."\t"."\$sql= \"SELECT " . $this->pk . " FROM " . $this->table_descriptor->getTable() . " ORDER BY " . $this->pk . "\";"."\n";
                 }
-            $buf .= "\t"."\t"."\t"."}"."\n";
-            $buf .= "\t"."\t"."\t"."\$this->dblink->query(\$sql);"."\n";
+            $buf .= "\t"."\t"."}"."\n";
+            $buf .= "\t"."\t"."\$this->dblink->query(\$sql);"."\n";
         }
-        $buf .= "\t"."\t"."}"."\n";
+        
         $buf .= "\t"."\t"."if(\$this->dblink->Error){"."\n";
         $buf .= "\t"."\t"."\t"."\$this->Error = \$this->dblink->Error;"."\n";
         $buf .= "\t"."\t"."\t"."return false;"."\n";
         $buf .= "\t"."\t"."}"."\n";
         $buf .= "\t"."\t"."\$this->NumRegs = \$this->dblink->num_rows();"."\n";
-        $buf .= "\t"."\t"."\$cont = 0;"."\n";
         $buf .= "\t"."\t"."while(\$this->dblink->next_record()){"."\n";
-        $buf .= "\t"."\t"."\t"."\$this->Detalle[\$cont] = \$this->dblink->f('". $this->pk ."');"."\n";
-        $buf .= "\t"."\t"."\t"."\$cont++;"."\n";
-        $buf .= "\t"."\t"."}"."\n";
+        $buf .= "\t"."\t"."\t"."\$this->Detalle[] = \$this->dblink->f('". $this->pk ."');"."\n";
+        $buf .= "\t"."\t"."}"."\n"."\n";
         $buf .= "\t"."\t"."return true;"."\n";
         $buf .= "\t"."}"."\n"."\n";
             
